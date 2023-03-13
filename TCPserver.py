@@ -23,8 +23,6 @@ mimetypes.types_map['.mp4'] = 'video/mp4'
 mimetypes.types_map['.mkv'] = 'video/x-matroska'
 
 
-
-
 def download_file(url, filename):
     parsed_url = urlparse(url)
 
@@ -49,32 +47,25 @@ def download_file(url, filename):
         return f'Error: {e}'
 
 
-# create a socket object
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print("Server listening... ")
 
-# get local machine name
 host = socket.gethostname()
 
 tcp_port = 9898
 
-# bind the socket to a public host, and a port
 serversocket.bind((host, tcp_port))
 
-# become a server socket
 serversocket.listen(1)
 
 while True:
-    # establish a connection
     clientsocket, addr = serversocket.accept()
 
     print("Got a connection from %s" % str(addr))
 
-    # receive URL and filename from client
     data = clientsocket.recv(1024)
     url, filename = data.decode('utf-8').split(',')
 
-    # check if file already exists
     content_type = requests.head(url).headers.get('Content-Type')
     if not content_type:
         response = 'Error: URL did not return a Content-Type header'
@@ -87,11 +78,9 @@ while True:
             if Path(filename).exists():
                 response = f'File {filename} already exists on the server.'
             else:
-                # download file
                 response = download_file(url, filename)
 
     # send response to client
     clientsocket.send(response.encode('utf-8'))
 
-    # close the client connection
     clientsocket.close()

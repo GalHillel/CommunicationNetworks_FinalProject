@@ -22,6 +22,7 @@ mimetypes.types_map['.avi'] = 'video/x-msvideo'
 mimetypes.types_map['.mp4'] = 'video/mp4'
 mimetypes.types_map['.mkv'] = 'video/x-matroska'
 
+
 def download_file(url, filename):
     parsed_url = urlparse(url)
 
@@ -46,11 +47,9 @@ def download_file(url, filename):
         return str(e)
 
 
-# create a socket object
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 print("Server listening... ")
 
-# get local machine name
 host = socket.gethostname()
 
 port = 7878
@@ -59,22 +58,18 @@ port = 7878
 serversocket.bind((host, port))
 
 while True:
-    # receive data from client
     data, client_address = serversocket.recvfrom(1024)
     print(f"Got a connection from {client_address[0]}:{client_address[1]}")
 
-    # split the data into URL and filename
     data = data.decode('utf-8').split(',')
     if len(data) != 2:
         response = 'Invalid request. Please provide a URL and a filename.'
     else:
         url, filename = data
 
-        # check if file already exists
         if Path(filename).exists():
             response = f'File {filename} already exists on the server.'
         else:
-            # download file using RUDP protocol
             try:
                 response = download_file(url, filename)
             except Exception as e:
