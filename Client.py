@@ -5,9 +5,15 @@ import socket
 # define function to initiate connection
 def connect():
     # get inputs from GUI
-    url = url_input.get()
+    global clientsocket
+    url = url_input.get().strip()
     protocol = protocol_var.get()
-    filename = filename_input.get()
+    filename = filename_input.get().strip()
+
+    # check if URL and filename are not empty
+    if not url or not filename:
+        response_label.config(text='Please provide a valid URL and filename')
+        return
 
     # get local machine name
     host = socket.gethostname()
@@ -27,23 +33,27 @@ def connect():
         response_label.config(text='Invalid protocol choice')
         return
 
-    clientsocket = socket.socket(socket.AF_INET, sock_type)
+    try:
+        clientsocket = socket.socket(socket.AF_INET, sock_type)
 
-    # connect to the server
-    clientsocket.connect((host, port))
+        # connect to the server
+        clientsocket.connect((host, port))
 
-    # send URL and filename to server
-    message = f"{url},{filename}"
-    clientsocket.sendto(message.encode('utf-8'), (host, port))
+        # send URL and filename to server
+        message = f"{url},{filename}"
+        clientsocket.sendto(message.encode('utf-8'), (host, port))
 
-    # receive response from server
-    response, server_address = clientsocket.recvfrom(1024)
+        # receive response from server
+        response, server_address = clientsocket.recvfrom(1024)
 
-    # update GUI with response
-    response_label.config(text=response.decode('utf-8'))
+        # update GUI with response
+        response_label.config(text=response.decode('utf-8'))
 
-    # close the socket
-    clientsocket.close()
+    except Exception as e:
+        response_label.config(text=f"Error: {e}")
+    finally:
+        # close the socket
+        clientsocket.close()
 
 
 # create GUI
